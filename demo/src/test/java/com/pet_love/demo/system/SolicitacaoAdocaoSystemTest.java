@@ -47,7 +47,7 @@ public class SolicitacaoAdocaoSystemTest {
         cadastrarSolicitacaoPadrao("Solicitação realizada");
 
         WebElement novaLinha = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.xpath("//td[contains(., 'Pet 3')]"))
+                ExpectedConditions.visibilityOfElementLocated(By.xpath("//td[contains(., 'Pet 1')]"))
         );
         Assertions.assertNotNull(novaLinha, "Solicitação de Adoção não foi adicionada à tabela");
     }
@@ -71,7 +71,7 @@ public class SolicitacaoAdocaoSystemTest {
     @Test
     void testCadastroSolicitacaoAdocaoSemDono() {
         abrirFormularioSolicitacaoAdocao();
-        preencherFormulario("Pet 3", "", "10-12-2025", "Solicitação realizada");
+        preencherFormulario("Pet 1", "", "10-12-2025", "Solicitação realizada");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
         saveBtn.click();
@@ -86,7 +86,7 @@ public class SolicitacaoAdocaoSystemTest {
     @Test
     void testCadastroSolicitacaoAdocaoSemData() {
         abrirFormularioSolicitacaoAdocao();
-        preencherFormulario("Pet 3", "Dono 1", "", "Solicitação realizada");
+        preencherFormulario("Pet 1", "Dono 1", "", "Solicitação realizada");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
         saveBtn.click();
@@ -101,7 +101,7 @@ public class SolicitacaoAdocaoSystemTest {
     @Test
     void testCadastroSolicitacaoAdocaoDataAnteriorADataAtual() {
         abrirFormularioSolicitacaoAdocao();
-        preencherFormulario("Pet 3", "Dono 1", "08-10-2025", "Solicitação realizada");
+        preencherFormulario("Pet 1", "Dono 1", "08-10-2025", "Solicitação realizada");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
         saveBtn.click();
@@ -116,7 +116,7 @@ public class SolicitacaoAdocaoSystemTest {
     @Test
     void cadastrarSolicitacaoAdocaoComDataInexistente() {
         abrirFormularioSolicitacaoAdocao();
-        preencherFormulario("Pet 3", "Dono 1", "31-02-2025", "Solicitação realizada");
+        preencherFormulario("Pet 1", "Dono 1", "31-02-2025", "Solicitação realizada");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
         saveBtn.click();
@@ -131,7 +131,7 @@ public class SolicitacaoAdocaoSystemTest {
     @Test
     void cadastroSolicitacaoAdocaoSemStatus() {
         abrirFormularioSolicitacaoAdocao();
-        preencherFormulario("Pet 3", "Dono 1", "10-12-2025", "");
+        preencherFormulario("Pet 1", "Dono 1", "10-12-2025", "");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
         saveBtn.click();
@@ -245,7 +245,7 @@ public class SolicitacaoAdocaoSystemTest {
 
     private void cadastrarSolicitacaoPadrao(String status) {
         abrirFormularioSolicitacaoAdocao();
-        preencherFormulario("Pet 3", "Dono 1", "10-12-2025", status);
+        preencherFormulario("Pet 1", "Dono 1", "10-12-2025", status);
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
         saveBtn.click();
     }
