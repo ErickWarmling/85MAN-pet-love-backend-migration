@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pet_love.demo.model.*;
 import com.pet_love.demo.model.dto.SolicitacaoAdocaoDTO;
 import com.pet_love.demo.repository.*;
+import com.pet_love.demo.service.SolicitacaoAdocaoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,7 +97,7 @@ public class SolicitacaoAdocaoControllerIntegrationTest {
     // CT07 - Atualizar o dono do pet ao aprovar solicitação de adoção
     @Test
     void testAtualizarDonoPetAoAprovarSolicitacaoAdocao() throws Exception {
-        SolicitacaoAdocaoDTO solicitacaoAdocaoDTO = new SolicitacaoAdocaoDTO();
+        SolicitacaoAdocaoDTO solicitacaoAdocaoDTO = SolicitacaoAdocaoService.convertToDTO(solicitacaoAdocao);
         solicitacaoAdocaoDTO.setStatus(2); // Status Aprovado
 
         mockMvc.perform(put("/api/solicitacao-adocao/" + solicitacaoAdocao.getId())
@@ -119,7 +120,7 @@ public class SolicitacaoAdocaoControllerIntegrationTest {
     // CT08 - Manter pet sem dono ao reprovar uma solicitação de adoção
     @Test
     void testManterPetSemDonoAoRprovarUmaSolicitacaoAdocao() throws Exception{
-        SolicitacaoAdocaoDTO solicitacaoAdocaoDTO = new SolicitacaoAdocaoDTO();
+        SolicitacaoAdocaoDTO solicitacaoAdocaoDTO = SolicitacaoAdocaoService.convertToDTO(solicitacaoAdocao);
         solicitacaoAdocaoDTO.setStatus(3); // Status Reprovado
 
         mockMvc.perform(put("/api/solicitacao-adocao/" + solicitacaoAdocao.getId())
@@ -149,7 +150,7 @@ public class SolicitacaoAdocaoControllerIntegrationTest {
     // CT09 - Aprovar solicitação de adoção enquanto outra está pendente para o mesmo pet
     @Test
     void testAprovarSolicitacaoAdocaoEnquantoOutraEstaPendente() throws Exception{
-        SolicitacaoAdocaoDTO solicitacaoAdocaoDTO = new SolicitacaoAdocaoDTO();
+        SolicitacaoAdocaoDTO solicitacaoAdocaoDTO = SolicitacaoAdocaoService.convertToDTO(solicitacaoAdocao);
         solicitacaoAdocaoDTO.setStatus(2); // Status Aprovado
 
         mockMvc.perform(put("/api/solicitacao-adocao/" + solicitacaoAdocao.getId())
@@ -187,13 +188,15 @@ public class SolicitacaoAdocaoControllerIntegrationTest {
     @Test
     void testExclusaoDeDonoComSolicitacaoAdocaoPendente() throws Exception{
         mockMvc.perform(delete("/api/pessoas/" + pessoaSolicitante.getId()))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("Não é possível excluir o dono pois ele está vinculado a uma solicitação de adoção"));
     }
 
     // CT11 - Exclusão de pet com solicitação de adoção pendente
     @Test
     void testExclusaoDePetComSolicitacaoAdocaoPendente() throws Exception{
         mockMvc.perform(delete("/api/pets/" + petSemDono.getId()))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("Não é possível excluir o pet pois ele está vinculado a uma solicitação de adoção"));
     }
 }
