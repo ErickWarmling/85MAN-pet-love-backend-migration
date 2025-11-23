@@ -31,7 +31,7 @@ public class SolicitacaoAdocaoSystemTest {
         driver.get(BASE_URL + "/adocoes");
 
         if (driver.getCurrentUrl().contains("/login")) {
-            realizarLogin("admin", "admin");
+            realizarLogin("usuario_veterinario", "warmling");
         }
 
         abrirMenuENavegarParaAdocoes();
