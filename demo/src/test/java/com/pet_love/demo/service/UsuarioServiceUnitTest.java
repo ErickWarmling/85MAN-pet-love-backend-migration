@@ -13,6 +13,7 @@ public class UsuarioServiceUnitTest {
 
     @Test
     public void convertToResponseDTO_mapeiaCamposCorretamente() {
+        //CT19
         Pessoa pessoa = new Pessoa();
         pessoa.setId(100L);
 
@@ -33,6 +34,7 @@ public class UsuarioServiceUnitTest {
 
     @Test
     public void convertFromCreateDTO_mapeiaCamposCorretamenteParaNovoUsuario() {
+        //CT20
         UsuarioCreateDTO dto = new UsuarioCreateDTO();
         dto.setLogin("jose");
         dto.setSenha("1234");

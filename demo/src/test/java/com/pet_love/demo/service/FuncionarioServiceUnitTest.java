@@ -11,6 +11,7 @@ public class FuncionarioServiceUnitTest {
 
     @Test
     public void convertToDTO_mapeiaCamposCorretamente() {
+        //CT17
         Funcionario f = new Funcionario();
         f.setId(1L);
         f.setNome("João");
@@ -36,6 +37,7 @@ public class FuncionarioServiceUnitTest {
 
     @Test
     public void convertFromDTO_mapeiaCamposCorretamente() {
+        //CT18
         FuncionarioDTO dto = new FuncionarioDTO();
         dto.setId(2L);
         dto.setNome("Maria");

@@ -12,6 +12,7 @@ public class RacaServiceUnitTest {
 
     @Test
     public void convertToDTO_mapeiaCamposCorretamente() {
+        //CT07
         Especie especie = new Especie();
         especie.setId(1L);
         especie.setNome("Canina");
@@ -33,6 +34,7 @@ public class RacaServiceUnitTest {
 
     @Test
     public void convertFromDTO_mapeiaCamposCorretamente() {
+        //CT08
         Especie especie = new Especie();
         especie.setId(2L);
         especie.setNome("Felina");

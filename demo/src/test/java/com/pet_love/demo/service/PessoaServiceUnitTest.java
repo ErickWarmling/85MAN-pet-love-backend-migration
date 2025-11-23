@@ -15,6 +15,7 @@ public class PessoaServiceUnitTest {
 
     @Test
     public void convertToDTO_mapeiaCamposCorretamente() {
+        //CT15
         // Configurando os pets
         Pet pet1 = new Pet();
         pet1.setId(101L);
@@ -54,6 +55,7 @@ public class PessoaServiceUnitTest {
 
     @Test
     public void convertFromDTO_mapeiaCamposCorretamente() {
+        //CT16
         PessoaDTO dto = new PessoaDTO();
         dto.setId(2L);
         dto.setNome("Maria");

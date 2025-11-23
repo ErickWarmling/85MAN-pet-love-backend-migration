@@ -11,6 +11,7 @@ public class EspecieServiceUnitTest {
 
     @Test
     public void convertToDTO_mapeiaCamposCorretamente() {
+        //CT05
         Especie especie = new Especie();
         especie.setId(1L);
         especie.setNome("Canina");
@@ -24,6 +25,7 @@ public class EspecieServiceUnitTest {
 
     @Test
     public void convertFromDTO_mapeiaCamposCorretamente() {
+        //CT06
         EspecieDTO dto = new EspecieDTO();
         dto.setId(2L);
         dto.setNome("Felina");
