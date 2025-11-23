@@ -12,6 +12,7 @@ public class PetServiceUnitTest {
 
     @Test
     public void convertToDTO_mapeiaCamposCorretamente() {
+        //CT09
         Pet pet = new Pet();
         pet.setId(10L);
         pet.setNome("Toby");
@@ -53,6 +54,7 @@ public class PetServiceUnitTest {
 
     @Test
     public void convertFromDTO_mapeiaCamposCorretamente() throws Exception {
+        //CT10
         Especie especieDto = new Especie(); especieDto.setId(5L);
         Raca racaDto = new Raca(); racaDto.setId(6L);
 
@@ -63,21 +65,15 @@ public class PetServiceUnitTest {
         dto.setEspecie(especieDto);
         dto.setRaca(racaDto);
 
-        PessoaPetDTO donoExistente = new PessoaPetDTO(); donoExistente.setPessoaId(20L); donoExistente.setPrincipal(true);
-        PessoaPetDTO donoInexistente = new PessoaPetDTO(); donoInexistente.setPessoaId(21L); donoInexistente.setPrincipal(false);
-        dto.setDonos(List.of(donoExistente, donoInexistente));
-
-        Especie especie = new Especie(); especie.setId(5L);
-        Raca raca = new Raca(); raca.setId(6L);
-        Pessoa pessoaExistente = new Pessoa(); pessoaExistente.setId(20L);
-
-
         Pet pet = PetService.convertFromDTO(dto);
 
         assertNotNull(pet);
         assertNotNull(pet.getEspecie());
-        assertEquals(5L, pet.getEspecie().getId());
         assertNotNull(pet.getRaca());
+        assertNotNull(pet.getDonos());
+        assertEquals(5L, pet.getEspecie().getId());
         assertEquals(6L, pet.getRaca().getId());
+        assertEquals("Nina", pet.getNome());
+        assertEquals("2020-05-05", pet.getDataNascimento());
     }
 }

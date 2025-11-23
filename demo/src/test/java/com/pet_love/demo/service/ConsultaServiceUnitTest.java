@@ -29,7 +29,7 @@ class ConsultaServiceUnitTest {
 
     @Test
     void convertToDTO_mapeiaCamposCorretamente() {
-        // dado
+        //CT01
         Funcionario func = new Funcionario();
         func.setId(10L);
         Pet pet = new Pet();
@@ -57,7 +57,7 @@ class ConsultaServiceUnitTest {
 
     @Test
     void convertFromDTO_retornaConsulta_quandoFuncionarioEPetExistem() throws Exception {
-        // dado
+        //CT02
         ConsultaDTO dto = new ConsultaDTO(5L,
                 LocalDateTime.of(2025, 2, 3, 9, 15),
                 "check",
@@ -90,7 +90,7 @@ class ConsultaServiceUnitTest {
 
     @Test
     void convertFromDTO_lancaEntityNotFound_quandoFuncionarioNaoExiste() throws Exception {
-        // dado
+        //CT03
         ConsultaDTO dto = new ConsultaDTO(null,
                 LocalDateTime.now(),
                 "x",
@@ -112,7 +112,7 @@ class ConsultaServiceUnitTest {
 
     @Test
     void convertFromDTO_lancaEntityNotFound_quandoPetNaoExiste() throws Exception {
-        // dado
+        //CT04
         ConsultaDTO dto = new ConsultaDTO(null,
                 LocalDateTime.now(),
                 "y",
@@ -132,16 +132,12 @@ class ConsultaServiceUnitTest {
         assertTrue(ex.getMessage().contains("Pet"));
     }
 
-    // --- helpers ---
-
     /**
-     * Injeta um proxy simples no campo nomeCampo da classe ConsultaService. O proxy implementa a interface
-     * esperada (ex.: FuncionarioRepository ou PetRepository) e responde ao método findById.
-     *
-     * @param nomeCampo   nome do campo privado em ConsultaService (funcionarioRepository|petRepository)
-     * @param metodo      nome do método a interceptar ("findById")
-     * @param esperadoId  id esperado no argumento
-     * @param retorno     Optional a ser retornado
+     * @param nomeCampo
+     * @param metodo
+     * @param esperadoId
+     * @param retorno
+     * @throws Exception
      */
     private void injectRepositoryProxy(String nomeCampo, String metodo, Long esperadoId, Optional<?> retorno) throws Exception {
         Field field = ConsultaService.class.getDeclaredField(nomeCampo);

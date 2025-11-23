@@ -10,6 +10,7 @@ import com.pet_love.demo.repository.ConsultaRepository;
 import com.pet_love.demo.repository.EspecieRepository;
 import com.pet_love.demo.repository.FuncionarioRepository;
 import com.pet_love.demo.repository.PetRepository;
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -103,18 +106,25 @@ class ConsultaControllerIntegrationTest {
                 null // petId removido
         );
 
-        mockMvc.perform(put("/api/consultas/" + consulta.getId())
+        ServletException ex = assertThrows(
+                ServletException.class,
+                () -> mockMvc.perform(put("/api/consultas/" + consulta.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(consultaDTO)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("É necessário informar um pet para a consulta"));
+        );
+
+        assertTrue(ex.getMessage().contains("É necessário informar um pet para a consulta"));
     }
 
     // CT02 - Excluir pet vinculado a uma consulta
     @Test
     void testExcluirPetVinculadoAConsulta_deveRetornarErro() throws Exception {
-        mockMvc.perform(delete("/api/pets/" + pet1.getId()))
-                .andExpect(status().isInternalServerError()); // sem validação específica
+        ServletException ex = assertThrows(
+                ServletException.class,
+                () -> mockMvc.perform(delete("/api/pets/" + pet1.getId()))
+        );
+
+        assertTrue(ex.getMessage().contains("Não é possível excluir o pet pois ele já está vinculado a uma consulta"));
     }
 
     // CT03 - Alterar pet da consulta e excluir pet anterior
@@ -145,8 +155,12 @@ class ConsultaControllerIntegrationTest {
     // CT05 - Excluir veterinário vinculado a uma consulta
     @Test
     void testExcluirVeterinarioVinculadoAConsulta_deveRetornarErro() throws Exception {
-        mockMvc.perform(delete("/api/funcionarios/" + vet1.getId()))
-                .andExpect(status().isInternalServerError()); // sem validação específica
+        ServletException ex = assertThrows(
+                ServletException.class,
+                () -> mockMvc.perform(delete("/api/funcionarios/" + vet1.getId()))
+        );
+
+        assertTrue(ex.getMessage().contains("Não é possível excluir o funcionário pois ele já está vinculado a uma consulta"));
     }
 
     // CT04 - Remover veterinário da consulta (veterinário = null)
@@ -161,10 +175,14 @@ class ConsultaControllerIntegrationTest {
                 pet1.getId()
         );
 
-        mockMvc.perform(put("/api/consultas/" + consulta.getId())
+        ServletException ex = assertThrows(
+                ServletException.class,
+                () -> mockMvc.perform(put("/api/consultas/" + consulta.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(consultaDTO)))
-                .andExpect(status().isInternalServerError());
+        );
+
+        assertTrue(ex.getMessage().contains("É necessário informar um veterinário para a consulta"));
     }
 
     // CT06 - Alterar veterinário da consulta e excluir veterinário anterior

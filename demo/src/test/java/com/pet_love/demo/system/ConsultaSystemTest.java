@@ -42,50 +42,13 @@ public class ConsultaSystemTest {
 
     @Test
     void testCadastroConsulta() {
-        // Clicar no botão "Nova Consulta"
-        WebElement novaConsultaBtn = wait.until(
-                ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(., 'Nova Consulta')]"))
-        );
-        novaConsultaBtn.click();
-
-        // Aguardar modal abrir
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.className("modal-dialog"))
-        );
-
-        // Preencher o campo Pet
-        Select petSelect = new Select(driver.findElement(By.name("pet")));
-        petSelect.selectByVisibleText("Pet 1");
-
-        // Preencher o campo Veterinário
-        Select vetSelect = new Select(driver.findElement(By.name("veterinary")));
-        vetSelect.selectByVisibleText("Vet 1");
-
-        // Preencher a data
-        WebElement dateInput = driver.findElement(By.name("date"));
-        dateInput.sendKeys("20-11-2025");
-
-        // Preencher o horário
-        WebElement timeInput = driver.findElement(By.name("time"));
-        timeInput.sendKeys("14:30");
-
-        // Preencher a descrição
-        WebElement descTextarea = driver.findElement(By.name("description"));
-        descTextarea.sendKeys("Consulta de rotina");
-
-        // Preencher o valor
-        WebElement valueInput = driver.findElement(By.name("value"));
-        valueInput.sendKeys("150");
-
-        // Clicar em Salvar
-        WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
-        saveBtn.click();
+        // CT01: nova consulta
+        cadastrarConsultaPadrao("Consulta de rotina", "150");
 
         // Verificar se a linha foi adicionada à tabela
         WebElement novaLinha = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.xpath("//td[contains(., 'Consulta de rotina')]"))
         );
-
         Assertions.assertNotNull(novaLinha, "Consulta não foi adicionada à tabela.");
     }
 
@@ -93,7 +56,6 @@ public class ConsultaSystemTest {
     void testCadastroConsultaSemDataEHora() {
         // CT02: Data e hora vazias
         abrirFormularioConsulta();
-
         preencherFormulario("Pet 1", "Vet 1", "", "", "Consulta de check-up.", "150");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
@@ -109,7 +71,6 @@ public class ConsultaSystemTest {
     void testCadastroConsultaDataPassada() {
         // CT03: Data anterior à atual
         abrirFormularioConsulta();
-
         preencherFormulario("Pet 1", "Vet 1", "01-01-2020", "16:20", "Consulta de check-up.", "150");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
@@ -125,7 +86,6 @@ public class ConsultaSystemTest {
     void testCadastroConsultaHorarioPassadoHoje() {
         // CT04: Data igual à atual e horário anterior
         abrirFormularioConsulta();
-
         String dataAtual = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         preencherFormulario("Pet 1", "Vet 1", dataAtual, "00:01", "Consulta de check-up.", "150");
 
@@ -156,7 +116,6 @@ public class ConsultaSystemTest {
     void testCadastroConsultaValorNegativo() {
         // CT06: Valor negativo
         abrirFormularioConsulta();
-
         preencherFormulario("Pet 1", "Vet 1", "20-11-2025", "16:30", "Consulta de check-up.", "-150");
 
         WebElement valueInput = driver.findElement(By.name("value"));
@@ -169,35 +128,42 @@ public class ConsultaSystemTest {
     @Test
     void testExcluirConsultaSucesso() {
         // CT07: Excluir consulta sem valor (ex.: "Sem valor")
-        WebElement consultaSemValor = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//tr[td[text()='0']]")
-        ));
-        WebElement deleteBtn = consultaSemValor.findElement(By.xpath(".//button[contains(., 'Excluir')]"));
-        deleteBtn.click();
+        cadastrarConsultaPadrao("Consulta sem valor para exclusão", "0");
 
-        // Aguarda o modal aparecer
-        WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.cssSelector("div.modal.show")
-        ));
-        Assertions.assertNotNull(modal, "Modal de confirmação não apareceu.");
+        WebElement row = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.xpath("//tr[td[text()='Consulta sem valor para exclusão']]")
+                )
+        );
 
-        // Clica no botão 'Sim' dentro do modal para confirmar a exclusão
-        WebElement confirmBtn = modal.findElement(By.xpath(".//button[contains(., 'Sim')]"));
-        confirmBtn.click();
+        row.findElement(By.xpath(".//button[contains(., 'Excluir')]")).click();
+        WebElement modal = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector("div.modal.show")
+                )
+        );
+        modal.findElement(By.xpath(".//button[contains(., 'Sim')]")).click();
 
-        // Aguarda a tabela ser atualizada (modal sumir e elemento ser removido)
-        wait.until(ExpectedConditions.invisibilityOf(modal));
-        wait.until(ExpectedConditions.stalenessOf(consultaSemValor));
+        // Aguarda desaparecer da tabela
+        wait.until(
+                ExpectedConditions.invisibilityOfElementLocated(
+                        By.xpath("//tr[td[text()='Consulta sem valor para exclusão']]")
+                )
+        );
 
-        Assertions.assertThrows(NoSuchElementException.class, () ->
-                        driver.findElement(By.xpath("//tr[td[contains(., 'Sem valor')]]")),
-                "Consulta sem valor ainda existe após exclusão."
+        Assertions.assertTrue(
+                driver.findElements(
+                        By.xpath("//tr[td[text()='Consulta sem valor para exclusão']]")
+                ).isEmpty(),
+                "Consulta ainda existe após exclusão."
         );
     }
 
     @Test
     void testExcluirConsultaComValor() {
         // CT08: Impedir exclusão caso haja valor informado
+        //cadastrarConsulta("Consulta com valor", "100");
+
         WebElement consultaComValor = wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//tr[td[contains(., 'Consulta de rotina')]]")
         ));
@@ -217,12 +183,18 @@ public class ConsultaSystemTest {
         }
     }
 
+    private void cadastrarConsultaPadrao(String descricao, String valor) {
+        abrirFormularioConsulta();
+        preencherFormulario("Pet 1", "Vet 1", "20-11-2025", "14:30", descricao, valor);
+        WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
+        saveBtn.click();
+    }
+
     private void abrirFormularioConsulta() {
         WebElement novaConsultaBtn = wait.until(
                 ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(., 'Nova Consulta')]"))
         );
         novaConsultaBtn.click();
-
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("modal-dialog")));
     }
 

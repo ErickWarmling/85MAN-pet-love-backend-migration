@@ -15,32 +15,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PessoaPetServiceUnitTest {
 
-    private void injectRepositoryProxy(String fieldName, Class<?> repoInterface, Long expectedId, Optional<?> returnOptional) throws Exception {
-        Object proxy = Proxy.newProxyInstance(
-                repoInterface.getClassLoader(),
-                new Class[]{repoInterface},
-                (proxyObj, method, args) -> {
-                    if ("findById".equals(method.getName()) && args != null && args.length == 1) {
-                        Long idArg = (Long) args[0];
-                        return idArg.equals(expectedId) ? returnOptional : Optional.empty();
-                    }
-                    // default return for other methods
-                    if (method.getReturnType().isPrimitive()) {
-                        if (method.getReturnType().equals(boolean.class)) return false;
-                        if (method.getReturnType().equals(int.class)) return 0;
-                    }
-                    return null;
-                }
-        );
-
-        Field field = PessoaPetService.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        // field is static
-        field.set(null, proxy);
-    }
-
     @Test
     public void convertToDTO_mapeiaCamposCorretamente() {
+        //CT11
         Pessoa pessoa = new Pessoa();
         pessoa.setId(11L);
 
@@ -62,6 +39,7 @@ public class PessoaPetServiceUnitTest {
 
     @Test
     public void convertFromDTO_retornaPessoaPet_quandoPessoaEPetExistem() throws Exception {
+        //CT12
         Long pessoaId = 101L;
         Long petId = 202L;
 
@@ -90,6 +68,7 @@ public class PessoaPetServiceUnitTest {
 
     @Test
     public void convertFromDTO_naoDefinePessoa_quandoPessoaNaoExiste() throws Exception {
+        //CT13
         Long pessoaId = 301L;
         Long petId = 302L;
 
@@ -116,6 +95,7 @@ public class PessoaPetServiceUnitTest {
 
     @Test
     public void convertFromDTO_naoDefinePet_quandoPetNaoExiste() throws Exception {
+        //CT14
         Long pessoaId = 401L;
         Long petId = 402L;
 
@@ -138,5 +118,36 @@ public class PessoaPetServiceUnitTest {
         assertNull(resultado.getPet());
         assertEquals(pessoaId, resultado.getPessoa().getId());
         assertFalse(resultado.isPrincipal());
+    }
+
+    /**
+     * @param fieldName
+     * @param repoInterface
+     * @param expectedId
+     * @param returnOptional
+     * @throws Exception
+     */
+    private void injectRepositoryProxy(String fieldName, Class<?> repoInterface, Long expectedId, Optional<?> returnOptional) throws Exception {
+        Object proxy = Proxy.newProxyInstance(
+                repoInterface.getClassLoader(),
+                new Class[]{repoInterface},
+                (proxyObj, method, args) -> {
+                    if ("findById".equals(method.getName()) && args != null && args.length == 1) {
+                        Long idArg = (Long) args[0];
+                        return idArg.equals(expectedId) ? returnOptional : Optional.empty();
+                    }
+                    // default return for other methods
+                    if (method.getReturnType().isPrimitive()) {
+                        if (method.getReturnType().equals(boolean.class)) return false;
+                        if (method.getReturnType().equals(int.class)) return 0;
+                    }
+                    return null;
+                }
+        );
+
+        Field field = PessoaPetService.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        // field is static
+        field.set(null, proxy);
     }
 }
