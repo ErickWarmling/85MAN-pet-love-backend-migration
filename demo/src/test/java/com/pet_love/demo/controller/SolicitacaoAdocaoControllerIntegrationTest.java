@@ -5,6 +5,7 @@ import com.pet_love.demo.model.*;
 import com.pet_love.demo.model.dto.SolicitacaoAdocaoDTO;
 import com.pet_love.demo.repository.*;
 import com.pet_love.demo.service.SolicitacaoAdocaoService;
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -44,6 +47,9 @@ public class SolicitacaoAdocaoControllerIntegrationTest {
     private EspecieRepository especieRepository;
 
     @Autowired
+    private ConsultaRepository consultaRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private Pet petSemDono;
@@ -55,9 +61,10 @@ public class SolicitacaoAdocaoControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        consultaRepository.deleteAll();
         pessoaPetRepository.deleteAll();
         solicitacaoAdocaoRepository.deleteAll();
-        pessoaRepository.deleteAll();
+        pessoaRepository.deleteAllWithoutUsuario();
         petRepository.deleteAll();
         especie = especieRepository.findAll().get(0);
 
@@ -187,16 +194,20 @@ public class SolicitacaoAdocaoControllerIntegrationTest {
     // CT10 - Exclusão de dono com solicitação de adoção pendente
     @Test
     void testExclusaoDeDonoComSolicitacaoAdocaoPendente() throws Exception{
-        mockMvc.perform(delete("/api/pessoas/" + pessoaSolicitante.getId()))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value("Não é possível excluir o dono pois ele está vinculado a uma solicitação de adoção"));
+        ServletException ex = assertThrows(
+                ServletException.class,
+                () -> mockMvc.perform(delete("/api/pessoas/" + pessoaSolicitante.getId()))
+        );
+        assertTrue(ex.getMessage().contains("Não é possível excluir o dono pois ele está vinculado a uma solicitação de adoção"));
     }
 
     // CT11 - Exclusão de pet com solicitação de adoção pendente
     @Test
     void testExclusaoDePetComSolicitacaoAdocaoPendente() throws Exception{
-        mockMvc.perform(delete("/api/pets/" + petSemDono.getId()))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value("Não é possível excluir o pet pois ele está vinculado a uma solicitação de adoção"));
+        ServletException ex = assertThrows(
+                ServletException.class,
+                () -> mockMvc.perform(delete("/api/pets/" + petSemDono.getId()))
+        );
+        assertTrue(ex.getMessage().contains("Não é possível excluir o pet pois ele está vinculado a uma solicitação de adoção"));
     }
 }

@@ -6,10 +6,7 @@ import com.pet_love.demo.model.Especie;
 import com.pet_love.demo.model.Funcionario;
 import com.pet_love.demo.model.Pet;
 import com.pet_love.demo.model.dto.ConsultaDTO;
-import com.pet_love.demo.repository.ConsultaRepository;
-import com.pet_love.demo.repository.EspecieRepository;
-import com.pet_love.demo.repository.FuncionarioRepository;
-import com.pet_love.demo.repository.PetRepository;
+import com.pet_love.demo.repository.*;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +32,9 @@ class ConsultaControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
+    private SolicitacaoAdocaoRepository solicitacaoAdocaoRepository;
+
+    @Autowired
     private ConsultaRepository consultaRepository;
 
     @Autowired
@@ -58,6 +58,7 @@ class ConsultaControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        solicitacaoAdocaoRepository.deleteAll();
         consultaRepository.deleteAll();
         petRepository.deleteAll();
         funcionarioRepository.deleteAll();
@@ -123,7 +124,6 @@ class ConsultaControllerIntegrationTest {
                 ServletException.class,
                 () -> mockMvc.perform(delete("/api/pets/" + pet1.getId()))
         );
-
         assertTrue(ex.getMessage().contains("Não é possível excluir o pet pois ele já está vinculado a uma consulta"));
     }
 
@@ -159,7 +159,6 @@ class ConsultaControllerIntegrationTest {
                 ServletException.class,
                 () -> mockMvc.perform(delete("/api/funcionarios/" + vet1.getId()))
         );
-
         assertTrue(ex.getMessage().contains("Não é possível excluir o funcionário pois ele já está vinculado a uma consulta"));
     }
 

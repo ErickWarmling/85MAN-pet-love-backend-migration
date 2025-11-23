@@ -4,10 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -47,29 +44,7 @@ public class SolicitacaoAdocaoSystemTest {
     // CT09 - Validar se o sistema cria uma nova solicitação de adoção com os dados corretos, sem erros
     @Test
     void testCadastroSolicitacaoAdocao() {
-        WebElement novaSolicitacaoBtn = wait.until(
-                ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(., 'Nova Solicitação')]"))
-        );
-        novaSolicitacaoBtn.click();
-
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.className("modal-dialog"))
-        );
-
-        Select petSelect = new Select(driver.findElement(By.name("pet")));
-        petSelect.selectByVisibleText("Pet 3");
-
-        Select donoSelect = new Select(driver.findElement(By.name("person")));
-        donoSelect.selectByVisibleText("Dono 1");
-
-        WebElement dateInput = driver.findElement(By.name("date"));
-        dateInput.sendKeys("10-12-2025");
-
-        Select statusSelect = new Select(driver.findElement(By.name("status")));
-        statusSelect.selectByVisibleText("Solicitação realizada");
-
-        WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
-        saveBtn.click();
+        cadastrarSolicitacaoPadrao("Solicitação realizada");
 
         WebElement novaLinha = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.xpath("//td[contains(., 'Pet 3')]"))
@@ -81,7 +56,6 @@ public class SolicitacaoAdocaoSystemTest {
     @Test
     void testCadastroSolicitacaoAdocaoSemPet() {
         abrirFormularioSolicitacaoAdocao();
-
         preencherFormulario("", "Dono 1", "10-12-2025", "Solicitação realizada");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
@@ -97,7 +71,6 @@ public class SolicitacaoAdocaoSystemTest {
     @Test
     void testCadastroSolicitacaoAdocaoSemDono() {
         abrirFormularioSolicitacaoAdocao();
-
         preencherFormulario("Pet 3", "", "10-12-2025", "Solicitação realizada");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
@@ -113,7 +86,6 @@ public class SolicitacaoAdocaoSystemTest {
     @Test
     void testCadastroSolicitacaoAdocaoSemData() {
         abrirFormularioSolicitacaoAdocao();
-
         preencherFormulario("Pet 3", "Dono 1", "", "Solicitação realizada");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
@@ -129,39 +101,36 @@ public class SolicitacaoAdocaoSystemTest {
     @Test
     void testCadastroSolicitacaoAdocaoDataAnteriorADataAtual() {
         abrirFormularioSolicitacaoAdocao();
-
         preencherFormulario("Pet 3", "Dono 1", "08-10-2025", "Solicitação realizada");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
         saveBtn.click();
 
-        WebElement errorMsg = wait.until(ExpectedConditions.visibilityOfElementLocated(
+        boolean message = !driver.findElements(
                 By.xpath("//*[contains(text(), 'A data da solicitação de adoção não pode ser anterior à data atual')]")
-        ));
-        Assertions.assertTrue(errorMsg.isDisplayed(), "Mensagem de erro não foi exibida");
+        ).isEmpty();
+        Assertions.assertTrue(message, "Mensagem de erro não foi exibida");
     }
 
     // CT14 - Validar se o sistema impede a criação de uma solicitação de adoção com data inexistente
     @Test
     void cadastrarSolicitacaoAdocaoComDataInexistente() {
         abrirFormularioSolicitacaoAdocao();
-
         preencherFormulario("Pet 3", "Dono 1", "31-02-2025", "Solicitação realizada");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
         saveBtn.click();
 
-        WebElement errorMsg = wait.until(ExpectedConditions.visibilityOfElementLocated(
+        boolean message = !driver.findElements(
                 By.xpath("//*[contains(text(), 'Data informada é inválida')]")
-        ));
-        Assertions.assertTrue(errorMsg.isDisplayed(), "Mensagem de erro não foi exibida");
+        ).isEmpty();
+        Assertions.assertTrue(message, "Mensagem de erro não foi exibida");
     }
 
     // CT15 - Validar se o sistema impede a criação de uma solicitação de adoção sem o status informado
     @Test
     void cadastroSolicitacaoAdocaoSemStatus() {
         abrirFormularioSolicitacaoAdocao();
-
         preencherFormulario("Pet 3", "Dono 1", "10-12-2025", "");
 
         WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
@@ -205,7 +174,13 @@ public class SolicitacaoAdocaoSystemTest {
     // CT17 - Validar se o sistema exclui uma solicitação de adoção com status "Aprovado"
     @Test
     void testeExcluirSolicitacaoAdocaoComStatusAprovado() {
-        WebElement solicitacaoAdocao = driver.findElement(By.xpath("//tr[td[contains(., 'Aprovado')]]"));
+        cadastrarSolicitacaoPadrao("Aprovado");
+
+        WebElement solicitacaoAdocao = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.xpath("//tr[td[text()='Aprovado']]")
+                )
+        );
 
         String conteudoSolicitacao = solicitacaoAdocao.getText();
 
@@ -219,12 +194,12 @@ public class SolicitacaoAdocaoSystemTest {
 
         WebElement confirmaBtn = modal.findElement(By.xpath(".//button[contains(., 'Sim')]"));
         confirmaBtn.click();
-
         wait.until(ExpectedConditions.invisibilityOf(modal));
-        WebElement errorMsg = wait.until(ExpectedConditions.visibilityOfElementLocated(
+
+        boolean message = !driver.findElements(
                 By.xpath("//*[contains(text(), \"Não é permitido excluir uma solicitação de adoção com status 'Aprovado'\")]")
-        ));
-        Assertions.assertNotNull(errorMsg, "Mensagem de erro não foi exibida");
+        ).isEmpty();
+        Assertions.assertTrue(message, "Mensagem de erro não foi exibida");
 
         WebElement solicitacaoAdocaoAposExclusao = wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//tr[td[contains(., '" + conteudoSolicitacao + "')]]")
@@ -235,7 +210,13 @@ public class SolicitacaoAdocaoSystemTest {
     // CT18 - Validar se o sistema exclui uma solicitação de adoção com status "Reprovado"
     @Test
     void testeExcluirSolicitacaoAdocaoComStatusReprovado() {
-        WebElement solicitacaoAdocao = driver.findElement(By.xpath("//tr[td[contains(., 'Reprovado')]]"));
+        cadastrarSolicitacaoPadrao("Reprovado");
+
+        WebElement solicitacaoAdocao = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.xpath("//tr[td[text()='Reprovado']]")
+                )
+        );
 
         String conteudoSolicitacao = solicitacaoAdocao.getText();
 
@@ -249,12 +230,12 @@ public class SolicitacaoAdocaoSystemTest {
 
         WebElement confirmaBtn = modal.findElement(By.xpath(".//button[contains(., 'Sim')]"));
         confirmaBtn.click();
-
         wait.until(ExpectedConditions.invisibilityOf(modal));
-        WebElement errorMsg = wait.until(ExpectedConditions.visibilityOfElementLocated(
+
+        boolean message = !driver.findElements(
                 By.xpath("//*[contains(text(), \"Não é permitido excluir uma solicitação de adoção com status 'Reprovado'\")]")
-        ));
-        Assertions.assertNotNull(errorMsg, "Mensagem de erro não foi exibida");
+        ).isEmpty();
+        Assertions.assertTrue(message, "Mensagem de erro não foi exibida");
 
         WebElement solicitacaoAdocaoAposExclusao = wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//tr[td[contains(., '" + conteudoSolicitacao + "')]]")
@@ -262,12 +243,18 @@ public class SolicitacaoAdocaoSystemTest {
         Assertions.assertNotNull(solicitacaoAdocaoAposExclusao, "A solicitação com status 'Reprovado' não deveria ter sido excluída");
     }
 
+    private void cadastrarSolicitacaoPadrao(String status) {
+        abrirFormularioSolicitacaoAdocao();
+        preencherFormulario("Pet 3", "Dono 1", "10-12-2025", status);
+        WebElement saveBtn = driver.findElement(By.xpath("//button[contains(., 'Salvar')]"));
+        saveBtn.click();
+    }
+
     private void abrirFormularioSolicitacaoAdocao() {
         WebElement novaSolicitacaoBtn = wait.until(
                 ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(., 'Nova Solicitação')]"))
         );
         novaSolicitacaoBtn.click();
-
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("modal-dialog")));
     }
 
